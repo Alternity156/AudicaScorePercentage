@@ -1,0 +1,6 @@
+
+*.cache
+*.dll
+*.CopyComplete
+ScorePercentage/obj/Release/ScorePercentage.csproj.FileListAbsolute.txt
+*.pdb
