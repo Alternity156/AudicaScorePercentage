@@ -13,7 +13,7 @@ namespace ScorePercentage
         public const string Name = "ScorePercentage"; // Name of the Mod.  (MUST BE SET)
         public const string Author = "Alternity"; // Author of the Mod.  (Set as null if none)
         public const string Company = null; // Company that made the Mod.  (Set as null if none)
-        public const string Version = "1.0.0"; // Version of the Mod.  (MUST BE SET)
+        public const string Version = "1.0.1"; // Version of the Mod.  (MUST BE SET)
         public const string DownloadLink = null; // Download Link for the Mod.  (Set as null if none)
     }
 
@@ -170,6 +170,7 @@ namespace ScorePercentage
         public static unsafe void ScoreKeeperDisplayUpdate(IntPtr @this)
         {
             ScorePercentage.ScoreKeeperDisplay_Update.InvokeOriginal(@this);
+            
             ScoreKeeperDisplay scoreKeeperDisplay = new ScoreKeeperDisplay(@this);
 
             int score = ScoreKeeper.I.mScore;
@@ -181,14 +182,17 @@ namespace ScorePercentage
 
             scoreKeeperDisplay.scoreDisplay.text = scoreString + percentageString;
 
-            HighScoreRecords.HighScoreInfo highScoreInfo = HighScoreRecords.GetHighScore(selectedSong);
-            float highScore = Convert.ToSingle(highScoreInfo.score);
-            float highScorePercentage = GetHighScorePercentage(selectedSong);
+            if (!KataConfig.I.practiceMode)
+            {
+                HighScoreRecords.HighScoreInfo highScoreInfo = HighScoreRecords.GetHighScore(selectedSong);
+                float highScore = Convert.ToSingle(highScoreInfo.score);
+                float highScorePercentage = GetHighScorePercentage(selectedSong);
 
-            string highScoreString = "<size=" + config.inGameHighScoreSize + ">" + String.Format("{0:n0}", highScore).Replace(",", " ") + "</size>";
-            string highScorePercentageString = "<size=" + config.inGamePercentSize + "> (" + String.Format("{0:0.00}", highScorePercentage) + "%)</size>";
+                string highScoreString = "<size=" + config.inGameHighScoreSize + ">" + String.Format("{0:n0}", highScore).Replace(",", " ") + "</size>";
+                string highScorePercentageString = "<size=" + config.inGamePercentSize + "> (" + String.Format("{0:0.00}", highScorePercentage) + "%)</size>";
 
-            scoreKeeperDisplay.highScoreDisplay.text = "<size=" + config.inGameHighScoreLabelSize + ">" + config.inGameHighScoreLabelText + "</size>" + highScoreString + highScorePercentageString;
+                scoreKeeperDisplay.highScoreDisplay.text = "<size=" + config.inGameHighScoreLabelSize + ">" + config.inGameHighScoreLabelText + "</size>" + highScoreString + highScorePercentageString;
+            }
         }
 
         public static unsafe void SetData(IntPtr @this, IntPtr row, int displayRank, int totalLeaderboardEntries)
