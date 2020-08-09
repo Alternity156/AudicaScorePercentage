@@ -1,45 +1,40 @@
-﻿using System;
-using System.IO;
-using System.Collections;
+using System;
+using System.Collections.Generic;
 using MelonLoader;
-using NET_SDK.Harmony;
-using NET_SDK;
 using UnityEngine;
+using Harmony;
+using System.Collections;
+using System.IO;
 
-namespace ScorePercentage
+namespace AudicaModding
 {
-    public static class BuildInfo
-    {
-        public const string Name = "ScorePercentage"; // Name of the Mod.  (MUST BE SET)
-        public const string Author = "Alternity"; // Author of the Mod.  (Set as null if none)
-        public const string Company = null; // Company that made the Mod.  (Set as null if none)
-        public const string Version = "1.0.1"; // Version of the Mod.  (MUST BE SET)
-        public const string DownloadLink = null; // Download Link for the Mod.  (Set as null if none)
-    }
-
-    public class ScorePercentage : MelonMod
+    public class AudicaMod : MelonMod
     {
         public static Config config = new Config();
 
-        public static Patch SongSelectItem_OnSelect;
-        public static Patch SongSelectItem_UpdateScoreDisplays;
-        public static Patch LeaderboardRow_SetData;
-        public static Patch ScoreKeeperDisplay_Update;
-        public static Patch SongInfoPanel_SetTopScore;
-        public static Patch SongInfoPanel_OnEnable;
-
-        public static StarThresholds starThresholds;
-
-        //The current way of tracking menu state.
-        //TODO: Hook to the SetMenuState function without breaking the game
         public static MenuState.State menuState;
         public static MenuState.State oldMenuState;
 
+        public static StarThresholds starThresholds;
         public static string selectedSong;
         public static int ostMaxTotalScore = 0;
         public static int extrasMaxTotalScore = 0;
+        public static class BuildInfo
+        {
+            public const string Name = "ScorePercentage";  // Name of the Mod.  (MUST BE SET)
+            public const string Author = "Alternity"; // Author of the Mod.  (Set as null if none)
+            public const string Company = null; // Company that made the Mod.  (Set as null if none)
+            public const string Version = "1.1.0"; // Version of the Mod.  (MUST BE SET)
+            public const string DownloadLink = null; // Download Link for the Mod.  (Set as null if none)
+        }
+        
+		 public override void OnApplicationStart()
+         {
+            HarmonyInstance instance = HarmonyInstance.Create("AudicaMod");
+            Hooks.ApplyHooks(instance);
+         }
 
-        //This returns the percentage of the high score for the specified song compared to the max possible score
+
         public static float GetHighScorePercentage(string songID)
         {
             //Get the needed data
@@ -85,7 +80,8 @@ namespace ScorePercentage
 
                 for (int i = 0; i < songs.Count; i++)
                 {
-                    SongList.SongData song = songs.get_Item(i);
+                    
+                    SongList.SongData song = songs[i];
                     if (e) { if (song.dlc | song.unlockable) { totalMaxScore += starThresholds.GetMaxRawScore(song.songID, KataConfig.Difficulty.Expert); } }
                     if (song.dlc == false && song.unlockable == false && song.extrasSong == false) { totalMaxScore += starThresholds.GetMaxRawScore(song.songID, KataConfig.Difficulty.Expert); }
                 }
@@ -145,45 +141,19 @@ namespace ScorePercentage
             Encoder.SetConfig(config, File.ReadAllText(path));
         }
 
-        public override void OnApplicationStart()
+        public static void ScoreKeeperDisplayUpdate(ScoreKeeperDisplay scoreKeeperDisplay)
         {
-            LoadConfig();
-
-            Instance instance = Manager.CreateInstance("ScorePercentage");
-
-            ScorePercentage.SongSelectItem_OnSelect = instance.Patch(SDK.GetClass("SongSelectItem").GetMethod("OnSelect"), typeof(ScorePercentage).GetMethod("OnSelect"));
-            ScorePercentage.SongSelectItem_UpdateScoreDisplays = instance.Patch(SDK.GetClass("SongSelectItem").GetMethod("UpdateScoreDisplays"), typeof(ScorePercentage).GetMethod("UpdateScoreDisplays"));
-            ScorePercentage.LeaderboardRow_SetData = instance.Patch(SDK.GetClass("LeaderboardRow").GetMethod("SetData"), typeof(ScorePercentage).GetMethod("SetData"));
-            ScorePercentage.ScoreKeeperDisplay_Update = instance.Patch(SDK.GetClass("ScoreKeeperDisplay").GetMethod("Update"), typeof(ScorePercentage).GetMethod("ScoreKeeperDisplayUpdate"));
-            ScorePercentage.SongInfoPanel_SetTopScore = instance.Patch(SDK.GetClass("SongInfoPanel").GetMethod("SetTopScore"), typeof(ScorePercentage).GetMethod("SetTopScore"));
-            ScorePercentage.SongInfoPanel_OnEnable = instance.Patch(SDK.GetClass("SongInfoPanel").GetMethod("OnEnable"), typeof(ScorePercentage).GetMethod("OnEnable"));
-        }
-
-        public static unsafe void OnEnable(IntPtr @this)
-        {
-            ScorePercentage.SongInfoPanel_OnEnable.InvokeOriginal(@this);
-            //SongInfoPanel songInfoPanel = new SongInfoPanel(@this);
-            //SongInfoHistoryItem[] items = songInfoPanel.history;
-            //TODO find a way to put percentages on the entire history
-        }
-
-        public static unsafe void ScoreKeeperDisplayUpdate(IntPtr @this)
-        {
-            ScorePercentage.ScoreKeeperDisplay_Update.InvokeOriginal(@this);
-            
-            ScoreKeeperDisplay scoreKeeperDisplay = new ScoreKeeperDisplay(@this);
-
-            int score = ScoreKeeper.I.mScore;
-            float percentage = GetScorePercentage(selectedSong, score, KataConfig.I.GetDifficulty());
-
-            //Make pretty-ish strings
-            string scoreString = "<size=" + config.inGameCurrentScoreSize + ">" + String.Format("{0:n0}", score).Replace(",", " ") + "</size>";
-            string percentageString = "<size=" + config.inGameCurrentPercentSize + "> (" + String.Format("{0:0.00}", percentage) + "%)</size>";
-
-            scoreKeeperDisplay.scoreDisplay.text = scoreString + percentageString;
-
             if (!KataConfig.I.practiceMode)
             {
+                int score = ScoreKeeper.I.mScore;
+                float percentage = GetScorePercentage(selectedSong, score, KataConfig.I.GetDifficulty());
+
+                //Make pretty-ish strings
+                string scoreString = "<size=" + config.inGameCurrentScoreSize + ">" + String.Format("{0:n0}", score).Replace(",", " ") + "</size>";
+                string percentageString = "<size=" + config.inGameCurrentPercentSize + "> (" + String.Format("{0:0.00}", percentage) + "%)</size>";
+
+                scoreKeeperDisplay.scoreDisplay.text = scoreString + percentageString;
+
                 HighScoreRecords.HighScoreInfo highScoreInfo = HighScoreRecords.GetHighScore(selectedSong);
                 float highScore = Convert.ToSingle(highScoreInfo.score);
                 float highScorePercentage = GetHighScorePercentage(selectedSong);
@@ -195,29 +165,17 @@ namespace ScorePercentage
             }
         }
 
-        public static unsafe void SetData(IntPtr @this, IntPtr row, int displayRank, int totalLeaderboardEntries)
+        public static void SetData(LeaderboardRow leaderboardRow)
         {
-            ScorePercentage.LeaderboardRow_SetData.InvokeOriginal(@this, new IntPtr[]
-            {
-                row,
-                new IntPtr((void*)(&displayRank)),
-                new IntPtr((void*)(&totalLeaderboardEntries))
-            });
 
-            LeaderboardRow leaderboardRow = new LeaderboardRow(@this);
-
-            MelonCoroutines.Start(UpdateLeaderboardRowCoroutine(leaderboardRow));
+            UpdateLeaderboardRow(leaderboardRow);
+            //MelonCoroutines.Start(UpdateLeaderboardRowCoroutine(leaderboardRow));
         }
 
         //Tracking the play history SetTopScore function
-        public static unsafe void SetTopScore(IntPtr @this, IntPtr highScore, IntPtr item)
+        public static void SetTopScore(SongInfoTopScoreItem item)
         {
-            ScorePercentage.SongInfoPanel_SetTopScore.InvokeOriginal(@this, new IntPtr[] 
-            {
-                highScore,
-                item
-            });
-            SongInfoTopScoreItem topScoreItem = new SongInfoTopScoreItem(item);
+            SongInfoTopScoreItem topScoreItem = item;
 
             //Get percentage
             float percentage = GetHighScorePercentage(selectedSong);
@@ -231,20 +189,13 @@ namespace ScorePercentage
         }
 
         //Tracking the song's buttons score display update function
-        public static unsafe void UpdateScoreDisplays(IntPtr @this, int score, KataConfig.Difficulty difficulty, float percent, bool fullCombo)
+        public static void UpdateScoreDisplays(SongSelectItem item, int score)
         {
-            ScorePercentage.SongSelectItem_UpdateScoreDisplays.InvokeOriginal(@this, new IntPtr[]
-            { 
-                new IntPtr((void*)(&score)),
-                new IntPtr((void*)(&difficulty)),
-                new IntPtr((void*)(&percent)),
-                new IntPtr((void*)(&fullCombo)),
-            });
 
             //If the score is zero we don't do anything
             if (score != 0)
             {
-                SongSelectItem button = new SongSelectItem(@this);
+                SongSelectItem button = item;
 
                 //Get percentage
                 float percentage = GetHighScorePercentage(button.GetSongData().songID);
@@ -259,14 +210,14 @@ namespace ScorePercentage
         }
 
         //Tracking selected song
-        public static void OnSelect(IntPtr @this)
+        public static void OnSelect(SongSelectItem ssi)
         {
-            ScorePercentage.SongSelectItem_OnSelect.InvokeOriginal(@this);
 
-            SongSelectItem button = new SongSelectItem(@this);
+            SongSelectItem button = ssi;
             string songID = button.mSongData.songID;
 
             selectedSong = songID;
+            MelonLogger.Log(songID);
         }
 
         public override void OnUpdate()
@@ -288,41 +239,62 @@ namespace ScorePercentage
             }
         }
 
-        /*
-        public override void OnLevelWasLoaded(int level)
-        {
-            MelonModLogger.Log("OnLevelWasLoaded: " + level.ToString());
-        }
-
-        public override void OnLevelWasInitialized(int level)
-        {
-            MelonModLogger.Log("OnLevelWasInitialized: " + level.ToString());
-        }
-
-        public override void OnFixedUpdate()
-        {
-            MelonModLogger.Log("OnFixedUpdate");
-        }
-
-        public override void OnLateUpdate()
-        {
-            MelonModLogger.Log("OnLateUpdate");
-        }
-
-        public override void OnGUI()
-        {
-            MelonModLogger.Log("OnGUI");
-        }
-
-        public override void OnApplicationQuit()
-        {
-            MelonModLogger.Log("OnApplicationQuit");
-        }
-
-        public override void OnModSettingsApplied()
-        {
-            MelonModLogger.Log("OnModSettingsApplied");
-        }
-        */
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

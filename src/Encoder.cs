@@ -1,6 +1,6 @@
 ﻿using SimpleJSON;
 
-namespace ScorePercentage
+namespace AudicaModding
 {
     class Encoder
     {

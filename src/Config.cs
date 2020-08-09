@@ -1,4 +1,4 @@
-﻿namespace ScorePercentage
+﻿namespace AudicaModding
 {
     public class Config
     {
