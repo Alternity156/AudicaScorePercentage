@@ -1,17 +1,10 @@
-using Harmony;
-using System.Reflection;
+﻿using Harmony;
 using System;
-using MelonLoader;
 
 namespace AudicaModding
 {
     internal static class Hooks
     {
-        public static void ApplyHooks(HarmonyInstance instance)
-        {
-            instance.PatchAll(Assembly.GetExecutingAssembly());
-        }
-
         [HarmonyPatch(typeof(SongSelectItem), "OnSelect")]
         private static class PatchSongOnSelect
         {
@@ -62,9 +55,9 @@ namespace AudicaModding
         [HarmonyPatch(typeof(SongInfoPanel), "OnEnable")]
         private static class PatchSongInfoOnEnable
         {
-            private static bool Postfix()
+            private static void Postfix()
             {
-                return true;
+                //return true;
             }
         }
     }

@@ -1,16 +1,21 @@
 using System;
-using System.Collections.Generic;
+using System.Collections;
+using Harmony;
 using MelonLoader;
 using UnityEngine;
-using Harmony;
-using System.Collections;
-using System.IO;
 
 namespace AudicaModding
 {
     public class AudicaMod : MelonMod
     {
-        public static Config config = new Config();
+        public static class BuildInfo
+        {
+            public const string Name = "ScorePercentage";  // Name of the Mod.  (MUST BE SET)
+            public const string Author = "Alternity"; // Author of the Mod.  (Set as null if none)
+            public const string Company = null; // Company that made the Mod.  (Set as null if none)
+            public const string Version = "1.1.1"; // Version of the Mod.  (MUST BE SET)
+            public const string DownloadLink = null; // Download Link for the Mod.  (Set as null if none)
+        }
 
         public static MenuState.State menuState;
         public static MenuState.State oldMenuState;
@@ -19,21 +24,92 @@ namespace AudicaModding
         public static string selectedSong;
         public static int ostMaxTotalScore = 0;
         public static int extrasMaxTotalScore = 0;
-        public static class BuildInfo
-        {
-            public const string Name = "ScorePercentage";  // Name of the Mod.  (MUST BE SET)
-            public const string Author = "Alternity"; // Author of the Mod.  (Set as null if none)
-            public const string Company = null; // Company that made the Mod.  (Set as null if none)
-            public const string Version = "1.1.0"; // Version of the Mod.  (MUST BE SET)
-            public const string DownloadLink = null; // Download Link for the Mod.  (Set as null if none)
-        }
-        
-		 public override void OnApplicationStart()
-         {
-            HarmonyInstance instance = HarmonyInstance.Create("AudicaMod");
-            Hooks.ApplyHooks(instance);
-         }
 
+        public static string leaderboardUserColor = "yellow";
+        public static string leaderboardHighScoreSize = "225";
+        public static string leaderboardPercentSize = "150";
+        public static string leaderboardUsernameSize = "225";
+        public static string songListHighScoreSize = "26";
+        public static string songListPercentSize = "17";
+        public static string inGameCurrentScoreSize = "120";
+        public static string inGameCurrentPercentSize = "75";
+        public static string inGameHighScoreLabelText = "HIGH SCORE: ";
+        public static string inGameHighScoreLabelSize = "55";
+        public static string inGameHighScoreSize = "55";
+        public static string inGamePercentSize = "40";
+        public static string historyTopScoreSize = "20";
+        public static string historyTopPercentSize = "14";
+
+        public override void OnApplicationStart()
+        {
+            HarmonyInstance instance = HarmonyInstance.Create("AudicaMod");
+        }
+
+        private void SaveConfig()
+        {
+            MelonPrefs.SetString("ScorePercentage", "leaderboardUserColor", leaderboardUserColor);
+            MelonPrefs.SetString("ScorePercentage", "leaderboardHighScoreSize", leaderboardHighScoreSize);
+            MelonPrefs.SetString("ScorePercentage", "leaderboardPercentSize", leaderboardPercentSize);
+            MelonPrefs.SetString("ScorePercentage", "leaderboardUsernameSize", leaderboardUsernameSize);
+            MelonPrefs.SetString("ScorePercentage", "songListHighScoreSize", songListHighScoreSize);
+            MelonPrefs.SetString("ScorePercentage", "songListPercentSize", songListPercentSize);
+            MelonPrefs.SetString("ScorePercentage", "inGameCurrentScoreSize", inGameCurrentScoreSize);
+            MelonPrefs.SetString("ScorePercentage", "inGameCurrentPercentSize", inGameCurrentPercentSize);
+            MelonPrefs.SetString("ScorePercentage", "inGameHighScoreLabelText", inGameHighScoreLabelText);
+            MelonPrefs.SetString("ScorePercentage", "inGameHighScoreLabelSize", inGameHighScoreLabelSize);
+            MelonPrefs.SetString("ScorePercentage", "inGameHighScoreSize", inGameHighScoreSize);
+            MelonPrefs.SetString("ScorePercentage", "inGamePercentSize", inGamePercentSize);
+            MelonPrefs.SetString("ScorePercentage", "historyTopScoreSize", historyTopScoreSize);
+            MelonPrefs.SetString("ScorePercentage", "historyTopPercentSize", historyTopPercentSize);
+        }
+
+        private void LoadConfig()
+        {
+            leaderboardUserColor = MelonPrefs.GetString("ScorePercentage", "leaderboardUserColor");
+            leaderboardHighScoreSize = MelonPrefs.GetString("ScorePercentage", "leaderboardHighScoreSize");
+            leaderboardPercentSize = MelonPrefs.GetString("ScorePercentage", "leaderboardPercentSize");
+            leaderboardUsernameSize = MelonPrefs.GetString("ScorePercentage", "leaderboardUsernameSize");
+            songListHighScoreSize = MelonPrefs.GetString("ScorePercentage", "songListHighScoreSize");
+            songListPercentSize = MelonPrefs.GetString("ScorePercentage", "songListPercentSize");
+            inGameCurrentScoreSize = MelonPrefs.GetString("ScorePercentage", "inGameCurrentScoreSize");
+            inGameCurrentPercentSize = MelonPrefs.GetString("ScorePercentage", "inGameCurrentPercentSize");
+            inGameHighScoreLabelText = MelonPrefs.GetString("ScorePercentage", "inGameHighScoreLabelText");
+            inGameHighScoreLabelSize = MelonPrefs.GetString("ScorePercentage", "inGameHighScoreLabelSize");
+            inGameHighScoreSize = MelonPrefs.GetString("ScorePercentage", "inGameHighScoreSize");
+            inGamePercentSize = MelonPrefs.GetString("ScorePercentage", "inGamePercentSize");
+            historyTopScoreSize = MelonPrefs.GetString("ScorePercentage", "historyTopScoreSize");
+            historyTopPercentSize = MelonPrefs.GetString("ScorePercentage", "historyTopPercentSize");
+        }
+
+        private void CreateConfig()
+        {
+            MelonPrefs.RegisterString("ScorePercentage", "leaderboardUserColor", "yellow");
+            MelonPrefs.RegisterString("ScorePercentage", "leaderboardHighScoreSize", "225");
+            MelonPrefs.RegisterString("ScorePercentage", "leaderboardPercentSize", "150");
+            MelonPrefs.RegisterString("ScorePercentage", "leaderboardUsernameSize", "225");
+            MelonPrefs.RegisterString("ScorePercentage", "songListHighScoreSize", "26");
+            MelonPrefs.RegisterString("ScorePercentage", "songListPercentSize", "17");
+            MelonPrefs.RegisterString("ScorePercentage", "inGameCurrentScoreSize", "120");
+            MelonPrefs.RegisterString("ScorePercentage", "inGameCurrentPercentSize", "75");
+            MelonPrefs.RegisterString("ScorePercentage", "inGameHighScoreLabelText", "HIGH SCORE: ");
+            MelonPrefs.RegisterString("ScorePercentage", "inGameHighScoreLabelSize", "55");
+            MelonPrefs.RegisterString("ScorePercentage", "inGameHighScoreSize", "55");
+            MelonPrefs.RegisterString("ScorePercentage", "inGamePercentSize", "40");
+            MelonPrefs.RegisterString("ScorePercentage", "historyTopScoreSize", "20");
+            MelonPrefs.RegisterString("ScorePercentage", "historyTopPercentSize", "14");
+        }
+
+        public override void OnLevelWasLoaded(int level)
+        {
+            if (!MelonPrefs.HasKey("ScorePercentage", "leaderboardUserColor"))
+            {
+                CreateConfig();
+            }
+            else
+            {
+                LoadConfig();
+            }
+        }
 
         public static float GetHighScorePercentage(string songID)
         {
@@ -80,7 +156,7 @@ namespace AudicaModding
 
                 for (int i = 0; i < songs.Count; i++)
                 {
-                    
+
                     SongList.SongData song = songs[i];
                     if (e) { if (song.dlc | song.unlockable) { totalMaxScore += starThresholds.GetMaxRawScore(song.songID, KataConfig.Difficulty.Expert); } }
                     if (song.dlc == false && song.unlockable == false && song.extrasSong == false) { totalMaxScore += starThresholds.GetMaxRawScore(song.songID, KataConfig.Difficulty.Expert); }
@@ -103,14 +179,14 @@ namespace AudicaModding
             }
 
             //Make pretty-ish strings
-            leaderboardRow.username.text = "<size=" + config.leaderboardUsernameSize + ">" + leaderboardRow.username.text + "</size>";
-            string scoreString = "<size=" + config.leaderboardHighScoreSize + ">" + String.Format("{0:n0}", score).Replace(",", " ") + "</size>";
-            string percentageString = "<size=" + config.leaderboardPercentSize + "> (" + String.Format("{0:0.00}", percentage) + "%)</size>";
+            leaderboardRow.username.text = "<size=" + leaderboardUsernameSize + ">" + leaderboardRow.username.text + "</size>";
+            string scoreString = "<size=" + leaderboardHighScoreSize + ">" + String.Format("{0:n0}", score).Replace(",", " ") + "</size>";
+            string percentageString = "<size=" + leaderboardPercentSize + "> (" + String.Format("{0:0.00}", percentage) + "%)</size>";
 
             //Update label
             if (leaderboardRow.score.text.Contains("<color=yellow>"))
             {
-                leaderboardRow.score.text = "<color=" + config.leaderboardUserColor + ">" + scoreString + percentageString + "</color>";
+                leaderboardRow.score.text = "<color=" + leaderboardUserColor + ">" + scoreString + percentageString + "</color>";
             }
             else
             {
@@ -119,26 +195,14 @@ namespace AudicaModding
 
             if (leaderboardRow.rank.text.Contains("<color=yellow>"))
             {
-                leaderboardRow.rank.text = leaderboardRow.rank.text.Replace("<color=yellow>", "<color=" + config.leaderboardUserColor + ">");
+                leaderboardRow.rank.text = leaderboardRow.rank.text.Replace("<color=yellow>", "<color=" + leaderboardUserColor + ">");
             }
 
             if (leaderboardRow.username.text.Contains("<color=yellow>"))
             {
-                leaderboardRow.username.text = leaderboardRow.username.text.Replace("<color=yellow>", "<color=" + config.leaderboardUserColor + ">");
+                leaderboardRow.username.text = leaderboardRow.username.text.Replace("<color=yellow>", "<color=" + leaderboardUserColor + ">");
             }
 
-        }
-
-        public static void LoadConfig()
-        {
-            string path = Application.dataPath + "/../Mods/Config/ScorePercentage.json";
-            if (!File.Exists(path))
-            {
-                Directory.CreateDirectory(Application.dataPath + "/../Mods/Config");
-                string contents = Encoder.GetConfig(config);
-                File.WriteAllText(path, contents);
-            }
-            Encoder.SetConfig(config, File.ReadAllText(path));
         }
 
         public static void ScoreKeeperDisplayUpdate(ScoreKeeperDisplay scoreKeeperDisplay)
@@ -149,8 +213,8 @@ namespace AudicaModding
                 float percentage = GetScorePercentage(selectedSong, score, KataConfig.I.GetDifficulty());
 
                 //Make pretty-ish strings
-                string scoreString = "<size=" + config.inGameCurrentScoreSize + ">" + String.Format("{0:n0}", score).Replace(",", " ") + "</size>";
-                string percentageString = "<size=" + config.inGameCurrentPercentSize + "> (" + String.Format("{0:0.00}", percentage) + "%)</size>";
+                string scoreString = "<size=" + inGameCurrentScoreSize + ">" + String.Format("{0:n0}", score).Replace(",", " ") + "</size>";
+                string percentageString = "<size=" + inGameCurrentPercentSize + "> (" + String.Format("{0:0.00}", percentage) + "%)</size>";
 
                 scoreKeeperDisplay.scoreDisplay.text = scoreString + percentageString;
 
@@ -158,10 +222,10 @@ namespace AudicaModding
                 float highScore = Convert.ToSingle(highScoreInfo.score);
                 float highScorePercentage = GetHighScorePercentage(selectedSong);
 
-                string highScoreString = "<size=" + config.inGameHighScoreSize + ">" + String.Format("{0:n0}", highScore).Replace(",", " ") + "</size>";
-                string highScorePercentageString = "<size=" + config.inGamePercentSize + "> (" + String.Format("{0:0.00}", highScorePercentage) + "%)</size>";
+                string highScoreString = "<size=" + inGameHighScoreSize + ">" + String.Format("{0:n0}", highScore).Replace(",", " ") + "</size>";
+                string highScorePercentageString = "<size=" + inGamePercentSize + "> (" + String.Format("{0:0.00}", highScorePercentage) + "%)</size>";
 
-                scoreKeeperDisplay.highScoreDisplay.text = "<size=" + config.inGameHighScoreLabelSize + ">" + config.inGameHighScoreLabelText + "</size>" + highScoreString + highScorePercentageString;
+                scoreKeeperDisplay.highScoreDisplay.text = "<size=" + inGameHighScoreLabelSize + ">" + inGameHighScoreLabelText + "</size>" + highScoreString + highScorePercentageString;
             }
         }
 
@@ -181,8 +245,8 @@ namespace AudicaModding
             float percentage = GetHighScorePercentage(selectedSong);
 
             //Make pretty-ish strings
-            string scoreString = "<size=" + config.historyTopScoreSize + ">" + String.Format("{0:n0}", HighScoreRecords.GetHighScore(selectedSong).score).Replace(",", " ") + "</size>";
-            string percentageString = "<size=" + config.historyTopPercentSize + "> (" + String.Format("{0:0.00}", percentage) + "%)</size>";
+            string scoreString = "<size=" + historyTopScoreSize + ">" + String.Format("{0:n0}", HighScoreRecords.GetHighScore(selectedSong).score).Replace(",", " ") + "</size>";
+            string percentageString = "<size=" + historyTopPercentSize + "> (" + String.Format("{0:0.00}", percentage) + "%)</size>";
 
             //Update label
             topScoreItem.score.text = scoreString + percentageString;
@@ -201,8 +265,8 @@ namespace AudicaModding
                 float percentage = GetHighScorePercentage(button.GetSongData().songID);
 
                 //Make pretty-ish strings
-                string scoreString = "<size=" + config.songListHighScoreSize + ">" + String.Format("{0:n0}", score).Replace(",", " ") + "</size>";
-                string percentageString = "<size=" + config.songListPercentSize + "> (" + String.Format("{0:0.00}", percentage) + "%)</size>";
+                string scoreString = "<size=" + songListHighScoreSize + ">" + String.Format("{0:n0}", score).Replace(",", " ") + "</size>";
+                string percentageString = "<size=" + songListPercentSize + "> (" + String.Format("{0:0.00}", percentage) + "%)</size>";
 
                 //Update button
                 button.highScoreLabel.text = scoreString + percentageString;
@@ -241,60 +305,6 @@ namespace AudicaModding
 
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1432CA97-52EF-4EFD-8FEC-1189DFDE802A}</ProjectGuid>
+    <ProjectGuid>{B450DB87-100F-446D-BA5F-93B6E9042F46}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AudicaModding</RootNamespace>
+    <RootNamespace>ScorePercentage</RootNamespace>
     <AssemblyName>ScorePercentage</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -181,15 +181,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\Config.cs" />
-    <Compile Include="src\Encoder.cs" />
     <Compile Include="src\Hooks.cs" />
     <Compile Include="src\Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="src\Util\SimpleJSON.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "D:\Games\Steam\steamapps\common\Audica\Mods\$(TargetFileName)"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetPath)" "F:\Steam\steamapps\common\Audica\Mods\$(TargetFileName)"</PostBuildEvent>
   </PropertyGroup>
 </Project>
